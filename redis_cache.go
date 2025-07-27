@@ -71,6 +71,44 @@ func (r *RedisCache) SetRaw(ctx context.Context, key string, item string, expira
 	return r.redisClient.Set(ctx, r._buildKey(key), item, expiration).Err()
 }
 
+func (r *RedisCache) GetManyRaw(ctx context.Context, ids []string) (map[string]*string, error) {
+	if len(ids) == 0 {
+		return nil, fmt.Errorf("no IDs provided for GetMany")
+	}
+
+	// Prefix each ID
+	keys := make([]string, len(ids))
+	for i, id := range ids {
+		keys[i] = r._buildKey(id)
+	}
+
+	// Use MGET to retrieve multiple keys
+	results, err := r.redisClient.MGet(ctx, keys...).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	// Prepare the result map
+	items := make(map[string]*string, len(ids))
+
+	for i, res := range results {
+		id := ids[i]
+		if res == nil {
+			// Key does not exist
+			items[id] = nil
+			continue
+		}
+		// res is of type interface{}, need to assert to string
+		strRes, ok := res.(string)
+		if !ok {
+			return nil, fmt.Errorf("unexpected type for key %s: %T", keys[i], res)
+		}
+		items[id] = &strRes
+	}
+
+	return items, nil
+}
+
 type TypedRedisCache[T any] struct {
 	RedisCache
 }
@@ -107,46 +145,20 @@ func (r *TypedRedisCache[T]) Set(ctx context.Context, key string, item T) error 
 }
 
 func (r *TypedRedisCache[T]) GetMany(ctx context.Context, ids []string) (map[string]*T, error) {
-	if len(ids) == 0 {
-		return nil, fmt.Errorf("no IDs provided for GetMany")
-	}
-
-	// Prefix each ID
-	keys := make([]string, len(ids))
-	for i, id := range ids {
-		keys[i] = r._buildKey(id)
-	}
-
-	// Use MGET to retrieve multiple keys
-	results, err := r.redisClient.MGet(ctx, keys...).Result()
+	typedResults := make(map[string]*T, len(ids))
+	result, err := r.GetManyRaw(ctx, ids)
 	if err != nil {
 		return nil, err
 	}
-
-	// Prepare the result map
-	items := make(map[string]*T, len(ids))
-
-	for i, res := range results {
-		id := ids[i]
-		if res == nil {
-			// Key does not exist
-			items[id] = nil
+	for id, item := range result {
+		if item == nil {
 			continue
 		}
-
-		// res is of type interface{}, need to assert to string
-		strRes, ok := res.(string)
-		if !ok {
-			return nil, fmt.Errorf("unexpected type for key %s: %T", keys[i], res)
+		var typed T
+		if err := json.Unmarshal([]byte(*item), &item); err != nil {
+			return nil, fmt.Errorf("error unmarshaling key %s: %v", id, err)
 		}
-
-		var item T
-		if err := json.Unmarshal([]byte(strRes), &item); err != nil {
-			return nil, fmt.Errorf("error unmarshaling key %s: %v", keys[i], err)
-		}
-
-		items[id] = &item
+		typedResults[id] = &typed
 	}
-
-	return items, nil
+	return typedResults, nil
 }

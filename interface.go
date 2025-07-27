@@ -13,6 +13,7 @@ type TypedCache[T any] interface {
 }
 
 type Cache interface {
+	GetManyRaw(ctx context.Context, ids []string) (map[string]*string, error)
 	GetAllKeys(ctx context.Context) ([]string, error)
 	GetRaw(ctx context.Context, id string) (*string, error)
 	Delete(ctx context.Context, id string) error
