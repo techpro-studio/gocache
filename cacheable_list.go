@@ -12,8 +12,9 @@ func GetCacheableList[T any](ctx context.Context, ids []string, repository ListR
 	if err != nil {
 		remaining = ids
 	} else {
-		for id, value := range cacheMap {
-			if value == nil {
+		for _, id := range ids {
+			value, ok := cacheMap[id]
+			if !ok && value == nil {
 				remaining = append(remaining, id)
 			}
 		}
