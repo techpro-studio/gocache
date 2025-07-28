@@ -155,7 +155,7 @@ func (r *TypedRedisCache[T]) GetMany(ctx context.Context, ids []string) (map[str
 			continue
 		}
 		var typed T
-		if err := json.Unmarshal([]byte(*item), &item); err != nil {
+		if err := json.Unmarshal([]byte(*item), &typed); err != nil {
 			return nil, fmt.Errorf("error unmarshaling key %s: %v", id, err)
 		}
 		typedResults[id] = &typed
