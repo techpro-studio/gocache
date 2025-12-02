@@ -7,6 +7,18 @@ import (
 
 type NoCache[T any] struct{}
 
+func No() *NoCache[any] {
+	return &NoCache[any]{}
+}
+
+func NoTyped[T any]() *NoCache[T] {
+	return &NoCache[T]{}
+}
+
+func (n NoCache[T]) GetManyRaw(ctx context.Context, ids []string) (map[string]*string, error) {
+	return nil, nil
+}
+
 func (n NoCache[T]) GetAllKeys(ctx context.Context) ([]string, error) {
 	return nil, nil
 }
