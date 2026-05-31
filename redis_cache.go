@@ -115,8 +115,12 @@ type TypedRedisCache[T any] struct {
 
 // getTypeName returns the lowercase name of the type T.
 
-func NewTypedRedisCache[T any](client *redis.Client) TypedCache[T] {
-	return &TypedRedisCache[T]{RedisCache{client, GetTypeName[T]()}}
+func NewTypedRedisCache[T any](client *redis.Client, servicePrefix string) TypedCache[T] {
+	prefix := GetTypeName[T]()
+	if servicePrefix != "" {
+		prefix = fmt.Sprintf("%s:%s", servicePrefix, prefix)
+	}
+	return &TypedRedisCache[T]{RedisCache{client, prefix}}
 }
 
 func (r *TypedRedisCache[T]) Get(ctx context.Context, id string) (*T, error) {

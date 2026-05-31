@@ -41,7 +41,7 @@ func TestGetCacheableList_AllInCache(t *testing.T) {
 	defer cleanup()
 
 	ctx := context.Background()
-	cache := NewTypedRedisCache[testEntity](client)
+	cache := NewTypedRedisCache[testEntity](client, "")
 
 	entity1 := testEntity{ID: "1", Name: "Entity 1", Value: 100}
 	entity2 := testEntity{ID: "2", Name: "Entity 2", Value: 200}
@@ -69,7 +69,7 @@ func TestGetCacheableList_NoneInCache(t *testing.T) {
 	defer cleanup()
 
 	ctx := context.Background()
-	cache := NewTypedRedisCache[testEntity](client)
+	cache := NewTypedRedisCache[testEntity](client, "")
 
 	entity1 := testEntity{ID: "1", Name: "Entity 1", Value: 100}
 	entity2 := testEntity{ID: "2", Name: "Entity 2", Value: 200}
@@ -105,7 +105,7 @@ func TestGetCacheableList_PartialCache(t *testing.T) {
 	defer cleanup()
 
 	ctx := context.Background()
-	cache := NewTypedRedisCache[testEntity](client)
+	cache := NewTypedRedisCache[testEntity](client, "")
 
 	entity1 := testEntity{ID: "1", Name: "Cached Entity", Value: 100}
 	entity2 := testEntity{ID: "2", Name: "Repo Entity", Value: 200}
@@ -138,7 +138,7 @@ func TestGetCacheableList_RepositoryError(t *testing.T) {
 	defer cleanup()
 
 	ctx := context.Background()
-	cache := NewTypedRedisCache[testEntity](client)
+	cache := NewTypedRedisCache[testEntity](client, "")
 
 	repo := &mockRepository{
 		data: map[string]testEntity{},
@@ -155,7 +155,7 @@ func TestGetCacheableList_PartialRepositoryError(t *testing.T) {
 	defer cleanup()
 
 	ctx := context.Background()
-	cache := NewTypedRedisCache[testEntity](client)
+	cache := NewTypedRedisCache[testEntity](client, "")
 
 	entity1 := testEntity{ID: "1", Name: "Cached Entity", Value: 100}
 	err := cache.Set(ctx, "1", entity1)
@@ -177,7 +177,7 @@ func TestGetCacheableList_EmptyIDs(t *testing.T) {
 	defer cleanup()
 
 	ctx := context.Background()
-	cache := NewTypedRedisCache[testEntity](client)
+	cache := NewTypedRedisCache[testEntity](client, "")
 
 	repo := &mockRepository{
 		data: map[string]testEntity{},
@@ -194,7 +194,7 @@ func TestGetCacheableList_SomeNotFoundInRepository(t *testing.T) {
 	defer cleanup()
 
 	ctx := context.Background()
-	cache := NewTypedRedisCache[testEntity](client)
+	cache := NewTypedRedisCache[testEntity](client, "")
 
 	entity1 := testEntity{ID: "1", Name: "Entity 1", Value: 100}
 
