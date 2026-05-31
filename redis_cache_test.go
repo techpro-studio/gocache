@@ -182,7 +182,7 @@ func TestTypedRedisCache_Get_Set(t *testing.T) {
 		Age  int    `json:"age"`
 	}
 
-	cache := NewTypedRedisCache[TestStruct](client)
+	cache := NewTypedRedisCache[TestStruct](client, "")
 	ctx := context.Background()
 
 	t.Run("set and get typed value", func(t *testing.T) {
@@ -221,7 +221,7 @@ func TestTypedRedisCache_GetMany(t *testing.T) {
 		Price float64 `json:"price"`
 	}
 
-	cache := NewTypedRedisCache[Product](client)
+	cache := NewTypedRedisCache[Product](client, "")
 	ctx := context.Background()
 
 	t.Run("get many typed values", func(t *testing.T) {
@@ -279,7 +279,7 @@ func TestTypedRedisCache_Prefix(t *testing.T) {
 		Name string `json:"name"`
 	}
 
-	cache := NewTypedRedisCache[User](client)
+	cache := NewTypedRedisCache[User](client, "")
 	ctx := context.Background()
 
 	err := cache.Set(ctx, "test-user", User{Name: "Alice"})
